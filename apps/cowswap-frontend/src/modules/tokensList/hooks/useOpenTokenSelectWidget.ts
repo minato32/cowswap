@@ -8,7 +8,7 @@ import { Nullish } from 'types'
 
 import { Field } from 'legacy/state/types'
 
-import { TradeType, useTradeTypeInfo } from 'modules/trade'
+import { TradeType, useIsHooksTradeType, useTradeTypeInfo } from 'modules/trade'
 import { useTradeTypeInfoFromUrl } from 'modules/trade/hooks/useTradeTypeInfoFromUrl'
 
 import { useCloseTokenSelectWidget } from './useCloseTokenSelectWidget'
@@ -23,12 +23,15 @@ export function useOpenTokenSelectWidget(): (
   const updateSelectTokenWidget = useUpdateSelectTokenWidgetState()
   const closeTokenSelectWidget = useCloseTokenSelectWidget()
   const isBridgingEnabled = useIsBridgingEnabled()
+  const isHooksTabEnabled = useIsHooksTradeType()
   const tradeTypeInfoFromState = useTradeTypeInfo()
   const tradeTypeInfoFromUrl = useTradeTypeInfoFromUrl()
   const tradeTypeInfo = tradeTypeInfoFromState ?? tradeTypeInfoFromUrl
   const tradeType = tradeTypeInfo?.tradeType
   // Advanced trades lock the target chain so price guarantees stay valid while the widget is open.
-  const shouldLockTargetChain = tradeType === TradeType.LIMIT_ORDER || tradeType === TradeType.ADVANCED_ORDERS
+  // The Hooks tab is also locked because partially-fillable orders cannot bridge (cowprotocol/cowswap#7490).
+  const shouldLockTargetChain =
+    tradeType === TradeType.LIMIT_ORDER || tradeType === TradeType.ADVANCED_ORDERS || isHooksTabEnabled
 
   return useCallback(
     (selectedToken, field, oppositeToken, onSelectToken) => {

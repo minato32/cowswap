@@ -9,7 +9,7 @@ import { useBridgeSupportedNetworks, useRoutesAvailability } from 'entities/brid
 
 import { Field } from 'legacy/state/types'
 
-import { TradeType } from 'modules/trade'
+import { TradeType, useIsHooksTradeType } from 'modules/trade'
 
 import { useShouldHideNetworkSelector } from 'common/hooks/useShouldHideNetworkSelector'
 
@@ -37,7 +37,11 @@ export function useChainsToSelect(): ChainsToSelectState | undefined {
   const { field, selectedTargetChainId = chainId, tradeType, oppositeToken } = useSelectTokenWidgetState()
   const { data: bridgeSupportedNetworks, isLoading } = useBridgeSupportedNetworks()
   const isBridgingEnabled = useIsBridgingEnabled() // Reads from Jotai atom
-  const isAdvancedTradeType = tradeType === TradeType.LIMIT_ORDER || tradeType === TradeType.ADVANCED_ORDERS
+  const isHooksTabEnabled = useIsHooksTradeType()
+  // Hooks tab uses partially-fillable orders, which the bridge layer cannot handle: a partially
+  // filled order leaves an unbridgeable remainder stuck in 'Bridging' state. See cowprotocol/cowswap#7490.
+  const isAdvancedTradeType =
+    tradeType === TradeType.LIMIT_ORDER || tradeType === TradeType.ADVANCED_ORDERS || isHooksTabEnabled
   const shouldHideNetworkSelector = useShouldHideNetworkSelector()
 
   const supportedChains = useSupportedChains()
