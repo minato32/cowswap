@@ -29,10 +29,11 @@ export interface PriceImpactIndicatorProps {
 
 export function PriceImpactIndicator({ priceImpactParams, isBridging = false }: PriceImpactIndicatorProps): ReactNode {
   const { priceImpact, loading: priceImpactLoading } = priceImpactParams || {}
+  const showPriceImpact = priceImpact && !priceImpactLoading
 
   return (
     <span>
-      {priceImpact ? (
+      {showPriceImpact ? (
         <PriceImpactWrapper priceImpact$={priceImpact} isBridging$={isBridging}>
           {' '}
           <HoverTooltip
